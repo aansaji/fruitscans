@@ -1,5 +1,6 @@
 @import "tailwindcss" source(none);
 @source "../src";
+@source inline("text-primary text-secondary text-citrus-orange text-berry-red bg-primary bg-secondary bg-citrus-orange bg-berry-red bg-primary/10 bg-secondary/10 bg-citrus-orange/10 bg-berry-red/10 bg-primary/20 bg-secondary/20 bg-citrus-orange/20 bg-berry-red/20 bg-primary/40 bg-secondary/40 bg-citrus-orange/40 bg-berry-red/40 border-primary/20 border-secondary/20 border-citrus-orange/20 border-berry-red/20 hover:bg-primary/40 hover:bg-secondary/40");
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
