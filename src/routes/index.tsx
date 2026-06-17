@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -8,9 +9,122 @@ const Icon = ({ name, className = "" }: { name: string; className?: string }) =>
   <span className={`material-symbols-outlined ${className}`}>{name}</span>
 );
 
-const PREVIEW_IMG =
-  "https://lh3.googleusercontent.com/aida/AP1WRLugwjZqAmXOwltnA3iQM2EJVuHPW83tI2CL4DDbm_dnxJBKFwWU7N3GTulzPa4nm2vUzDXetEFIgmpYy_Enk60y3Hm-y-xLYICTinyuY7dybi8ANgJWnZgunVZfB9lqWCF0GW9z8bf_XJ1cb3YE8YNVBxs-OvT3G5hrkMfGlOnN0hcdM69QnAxMapEHggMX2h44N-joYv4KZYf6qwAyboev9Mp4F3D8nVvQ7ZPuiIdU9Y2sOZMlvAP43g";
+// ─────────── Preset produce ───────────
+type ColorKey = "primary" | "secondary" | "citrus-orange" | "berry-red";
+type Metric = {
+  icon: string;
+  label: string;
+  value: string;
+  unit: string;
+  status: string;
+  color: ColorKey;
+  pct: number;
+  glow: string;
+};
+type Produce = {
+  id: string;
+  name: string;
+  emoji: string;
+  category: "Fruit" | "Vegetable";
+  image: string;
+  metrics: Metric[];
+  spectrum: number[]; // 8 bars 0–100
+};
 
+const PRODUCE: Produce[] = [
+  {
+    id: "strawberry",
+    name: "Strawberry",
+    emoji: "🍓",
+    category: "Fruit",
+    image:
+      "https://images.unsplash.com/photo-1518635017498-87f514b751ba?auto=format&fit=crop&w=1200&q=80",
+    metrics: [
+      { icon: "eco", label: "Ripeness Index", value: "92", unit: "/ 100", status: "Peak", color: "primary", pct: 92, glow: "glow-green" },
+      { icon: "opacity", label: "Moisture Level", value: "91.0", unit: "%", status: "High", color: "secondary", pct: 91, glow: "glow-blue" },
+      { icon: "bloodtype", label: "Sugar Content", value: "8.4", unit: "°Bx", status: "Sweet", color: "citrus-orange", pct: 70, glow: "glow-orange" },
+      { icon: "warning", label: "Pesticide Detection", value: "0.04", unit: "ppm", status: "Trace", color: "berry-red", pct: 22, glow: "glow-red" },
+    ],
+    spectrum: [30, 55, 70, 85, 60, 45, 75, 40],
+  },
+  {
+    id: "apple",
+    name: "Apple",
+    emoji: "🍎",
+    category: "Fruit",
+    image:
+      "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?auto=format&fit=crop&w=1200&q=80",
+    metrics: [
+      { icon: "eco", label: "Ripeness Index", value: "87", unit: "/ 100", status: "Optimal", color: "primary", pct: 87, glow: "glow-green" },
+      { icon: "opacity", label: "Moisture Level", value: "14.2", unit: "%", status: "Moderate", color: "citrus-orange", pct: 62, glow: "glow-orange" },
+      { icon: "bloodtype", label: "Sugar Content", value: "12.5", unit: "°Bx", status: "High Brix", color: "secondary", pct: 75, glow: "glow-blue" },
+      { icon: "warning", label: "Pesticide Detection", value: "0.02", unit: "ppm", status: "Trace", color: "berry-red", pct: 15, glow: "glow-red" },
+    ],
+    spectrum: [40, 60, 35, 80, 55, 45, 90, 30],
+  },
+  {
+    id: "banana",
+    name: "Banana",
+    emoji: "🍌",
+    category: "Fruit",
+    image:
+      "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=1200&q=80",
+    metrics: [
+      { icon: "eco", label: "Ripeness Index", value: "78", unit: "/ 100", status: "Ripe", color: "citrus-orange", pct: 78, glow: "glow-orange" },
+      { icon: "opacity", label: "Moisture Level", value: "74.9", unit: "%", status: "Balanced", color: "secondary", pct: 75, glow: "glow-blue" },
+      { icon: "bloodtype", label: "Sugar Content", value: "18.0", unit: "°Bx", status: "Very High", color: "primary", pct: 90, glow: "glow-green" },
+      { icon: "warning", label: "Pesticide Detection", value: "0.00", unit: "ppm", status: "Clean", color: "berry-red", pct: 4, glow: "glow-red" },
+    ],
+    spectrum: [25, 45, 60, 70, 80, 55, 65, 50],
+  },
+  {
+    id: "tomato",
+    name: "Tomato",
+    emoji: "🍅",
+    category: "Vegetable",
+    image:
+      "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=1200&q=80",
+    metrics: [
+      { icon: "eco", label: "Ripeness Index", value: "81", unit: "/ 100", status: "Optimal", color: "primary", pct: 81, glow: "glow-green" },
+      { icon: "opacity", label: "Moisture Level", value: "94.5", unit: "%", status: "High", color: "secondary", pct: 94, glow: "glow-blue" },
+      { icon: "bloodtype", label: "Sugar Content", value: "4.2", unit: "°Bx", status: "Low", color: "citrus-orange", pct: 35, glow: "glow-orange" },
+      { icon: "warning", label: "Pesticide Detection", value: "0.06", unit: "ppm", status: "Trace", color: "berry-red", pct: 28, glow: "glow-red" },
+    ],
+    spectrum: [50, 75, 45, 85, 40, 65, 55, 35],
+  },
+  {
+    id: "carrot",
+    name: "Carrot",
+    emoji: "🥕",
+    category: "Vegetable",
+    image:
+      "https://images.unsplash.com/photo-1582515073490-39981397c445?auto=format&fit=crop&w=1200&q=80",
+    metrics: [
+      { icon: "eco", label: "Ripeness Index", value: "85", unit: "/ 100", status: "Optimal", color: "primary", pct: 85, glow: "glow-green" },
+      { icon: "opacity", label: "Moisture Level", value: "88.3", unit: "%", status: "High", color: "secondary", pct: 88, glow: "glow-blue" },
+      { icon: "bloodtype", label: "Sugar Content", value: "6.1", unit: "°Bx", status: "Moderate", color: "citrus-orange", pct: 50, glow: "glow-orange" },
+      { icon: "warning", label: "Pesticide Detection", value: "0.01", unit: "ppm", status: "Clean", color: "berry-red", pct: 8, glow: "glow-red" },
+    ],
+    spectrum: [35, 50, 80, 55, 70, 90, 45, 60],
+  },
+  {
+    id: "avocado",
+    name: "Avocado",
+    emoji: "🥑",
+    category: "Fruit",
+    image:
+      "https://images.unsplash.com/photo-1601039641847-7857b994d704?auto=format&fit=crop&w=1200&q=80",
+    metrics: [
+      { icon: "eco", label: "Ripeness Index", value: "69", unit: "/ 100", status: "Near Ripe", color: "citrus-orange", pct: 69, glow: "glow-orange" },
+      { icon: "opacity", label: "Moisture Level", value: "73.2", unit: "%", status: "Balanced", color: "secondary", pct: 73, glow: "glow-blue" },
+      { icon: "bloodtype", label: "Sugar Content", value: "0.7", unit: "°Bx", status: "Low", color: "primary", pct: 10, glow: "glow-green" },
+      { icon: "warning", label: "Pesticide Detection", value: "0.00", unit: "ppm", status: "Clean", color: "berry-red", pct: 3, glow: "glow-red" },
+    ],
+    spectrum: [60, 40, 55, 70, 50, 80, 35, 65],
+  },
+];
+
+// ─────────── Top Nav ───────────
 function TopNav() {
   const links = ["Scan", "Library", "Devices", "Insights"];
   return (
@@ -31,15 +145,29 @@ function TopNav() {
             </a>
           ))}
         </nav>
-        <button className="btn-depth px-4 py-2 rounded-full bg-primary text-on-primary text-sm font-semibold">
+        <a
+          href="#presets"
+          className="btn-depth px-4 py-2 rounded-full bg-primary text-on-primary text-sm font-semibold"
+        >
           New Scan
-        </button>
+        </a>
       </div>
     </header>
   );
 }
 
-function Hero() {
+// ─────────── Hero ───────────
+function Hero({
+  current,
+  scanning,
+  progress,
+  onScan,
+}: {
+  current: Produce;
+  scanning: boolean;
+  progress: number;
+  onScan: () => void;
+}) {
   return (
     <section className="relative bg-surface px-6 py-12 md:py-20 overflow-hidden">
       <div className="absolute top-0 right-0 w-1/3 h-1/2 bg-primary/5 blur-[120px] -z-10" />
@@ -54,19 +182,26 @@ function Hero() {
               with Precision.
             </h1>
             <p className="text-base md:text-lg text-on-surface-variant mt-4 max-w-lg">
-              Upload high-resolution captures or connect your FruitScan Elite device for
+              Pick a preset from your produce library or connect your FruitScan Elite device for
               real-time molecular-level quality inspection.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <button className="btn-depth flex items-center justify-center gap-2 px-8 py-4 bg-primary text-on-primary rounded-full font-semibold hover:brightness-110">
-              <Icon name="photo_camera" />
-              Activate Camera
+            <button
+              onClick={onScan}
+              disabled={scanning}
+              className="btn-depth flex items-center justify-center gap-2 px-8 py-4 bg-primary text-on-primary rounded-full font-semibold hover:brightness-110 disabled:opacity-60"
+            >
+              <Icon name={scanning ? "radar" : "photo_camera"} />
+              {scanning ? `Scanning… ${progress}%` : `Scan ${current.name}`}
             </button>
-            <button className="btn-depth flex items-center justify-center gap-2 px-8 py-4 border border-outline-variant bg-surface-container/50 text-white rounded-full font-semibold hover:bg-surface-container">
-              <Icon name="upload_file" />
-              Batch Upload
-            </button>
+            <a
+              href="#presets"
+              className="btn-depth flex items-center justify-center gap-2 px-8 py-4 border border-outline-variant bg-surface-container/50 text-white rounded-full font-semibold hover:bg-surface-container"
+            >
+              <Icon name="grid_view" />
+              Browse Produce
+            </a>
           </div>
         </div>
 
@@ -74,30 +209,43 @@ function Hero() {
           <div className="scanner-border-3d p-4 bg-surface-container-high/30 backdrop-blur-sm">
             <div className="relative rounded-2xl overflow-hidden aspect-video bg-surface-container-lowest flex flex-col items-center justify-center border border-white/5 group-hover:border-primary/20 transition-all">
               <img
-                alt="Scanning preview"
-                className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-luminosity grayscale"
-                src={PREVIEW_IMG}
+                alt={`${current.name} scan preview`}
+                className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ${
+                  scanning ? "opacity-70 grayscale-0" : "opacity-30 mix-blend-luminosity grayscale"
+                }`}
+                src={current.image}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-60" />
+              {scanning && (
+                <div
+                  className="absolute left-0 right-0 h-[2px] bg-primary glow-green"
+                  style={{ top: `${progress}%`, transition: "top 60ms linear" }}
+                />
+              )}
               <div className="relative z-10 text-center p-8 bg-surface-container/40 backdrop-blur-md rounded-xl border border-white/10 glass-card">
-                <Icon name="target" className="text-4xl! text-primary mb-4 block glow-green" />
-                <h3 className="text-xl font-semibold text-white">Drop an Image or Scan</h3>
+                <span className="text-5xl mb-3 block">{current.emoji}</span>
+                <h3 className="text-xl font-semibold text-white">
+                  {scanning ? "Analyzing Sample…" : current.name}
+                </h3>
                 <p className="text-sm text-on-surface-variant mt-2">
-                  Support for JPG, PNG, and RAW analysis
+                  {scanning
+                    ? `Spectral pass ${progress}%`
+                    : `${current.category} · ready for inspection`}
                 </p>
                 <div className="mt-6 flex justify-center gap-2">
-                  <div
-                    className="w-1.5 h-8 bg-primary rounded-full glow-green"
-                    style={{ animation: "bounce 1s infinite" }}
-                  />
-                  <div
-                    className="w-1.5 h-8 bg-primary/60 rounded-full"
-                    style={{ animation: "bounce 1.2s infinite" }}
-                  />
-                  <div
-                    className="w-1.5 h-8 bg-primary/30 rounded-full"
-                    style={{ animation: "bounce 1.4s infinite" }}
-                  />
+                  {[0, 1, 2].map((i) => (
+                    <div
+                      key={i}
+                      className={`w-1.5 h-8 rounded-full ${
+                        scanning ? "bg-primary glow-green" : "bg-primary/30"
+                      }`}
+                      style={
+                        scanning
+                          ? { animation: `bounce ${1 + i * 0.2}s infinite` }
+                          : undefined
+                      }
+                    />
+                  ))}
                 </div>
               </div>
             </div>
@@ -121,24 +269,59 @@ function Hero() {
   );
 }
 
-type Metric = {
-  icon: string;
-  label: string;
-  value: string;
-  unit: string;
-  status: string;
-  color: "primary" | "secondary" | "citrus-orange" | "berry-red";
-  pct: number;
-  glow: string;
-};
+// ─────────── Preset Picker ───────────
+function PresetPicker({
+  current,
+  onPick,
+  disabled,
+}: {
+  current: Produce;
+  onPick: (p: Produce) => void;
+  disabled: boolean;
+}) {
+  return (
+    <section id="presets" className="bg-surface-container-lowest py-16 border-t border-white/5">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-8">
+          <div>
+            <h2 className="text-3xl font-bold text-white">Produce Library</h2>
+            <p className="text-sm text-on-surface-variant mt-1">
+              Choose a preset sample to load its calibrated profile and run a scan.
+            </p>
+          </div>
+          <span className="text-xs uppercase tracking-wider text-on-surface-variant">
+            {PRODUCE.length} presets available
+          </span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          {PRODUCE.map((p) => {
+            const active = p.id === current.id;
+            return (
+              <button
+                key={p.id}
+                onClick={() => onPick(p)}
+                disabled={disabled}
+                className={`btn-depth glass-card rounded-2xl p-4 flex flex-col items-center gap-2 text-center transition-all border ${
+                  active
+                    ? "border-primary/50 glow-green"
+                    : "border-white/5 hover:border-primary/30"
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                <span className="text-4xl">{p.emoji}</span>
+                <span className="text-sm font-semibold text-white">{p.name}</span>
+                <span className="text-[10px] uppercase tracking-wider text-on-surface-variant">
+                  {p.category}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
 
-const METRICS: Metric[] = [
-  { icon: "eco", label: "Ripeness Index", value: "87", unit: "/ 100", status: "Optimal", color: "primary", pct: 87, glow: "glow-green" },
-  { icon: "opacity", label: "Moisture Level", value: "14.2", unit: "%", status: "Moderate", color: "citrus-orange", pct: 62, glow: "glow-orange" },
-  { icon: "bloodtype", label: "Sugar Content", value: "12.5", unit: "°Bx", status: "High Brix", color: "secondary", pct: 75, glow: "glow-blue" },
-  { icon: "warning", label: "Pesticide Detection", value: "0.02", unit: "ppm", status: "Trace Detected", color: "berry-red", pct: 15, glow: "glow-red" },
-];
-
+// ─────────── Dashboard ───────────
 function MetricCard({ m }: { m: Metric }) {
   const c = `text-${m.color}`;
   const bg = `bg-${m.color}`;
@@ -148,7 +331,9 @@ function MetricCard({ m }: { m: Metric }) {
     <div className="p-6 rounded-3xl glass-card transition-transform hover:scale-[1.02] duration-300">
       <div className="flex justify-between items-start mb-6">
         <Icon name={m.icon} className={`${c} ${m.glow}`} />
-        <span className={`text-[10px] ${c} ${chipBg} border ${chipBorder} px-2 py-0.5 rounded uppercase font-bold tracking-wider`}>
+        <span
+          className={`text-[10px] ${c} ${chipBg} border ${chipBorder} px-2 py-0.5 rounded uppercase font-bold tracking-wider`}
+        >
           {m.status}
         </span>
       </div>
@@ -160,29 +345,24 @@ function MetricCard({ m }: { m: Metric }) {
         <span className="text-sm text-on-surface-variant">{m.unit}</span>
       </div>
       <div className="w-full bg-surface h-2 rounded-full mt-4 overflow-hidden sunk-in">
-        <div className={`${bg} h-full rounded-full ${m.glow}`} style={{ width: `${m.pct}%` }} />
+        <div
+          className={`${bg} h-full rounded-full ${m.glow} transition-[width] duration-700`}
+          style={{ width: `${m.pct}%` }}
+        />
       </div>
     </div>
   );
 }
 
-function Dashboard() {
-  const bars = [
-    { h: 40, c: "secondary", g: "glow-blue" },
-    { h: 60, c: "primary", g: "glow-green" },
-    { h: 35, c: "secondary", g: "glow-blue" },
-    { h: 80, c: "primary", g: "glow-green" },
-    { h: 55, c: "secondary", g: "glow-blue" },
-    { h: 45, c: "primary", g: "glow-green" },
-    { h: 90, c: "secondary", g: "glow-blue" },
-    { h: 30, c: "primary", g: "glow-green" },
-  ];
+function Dashboard({ current }: { current: Produce }) {
   return (
     <section className="py-20 bg-surface-container-lowest border-t border-white/5">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
           <div>
-            <h2 className="text-3xl font-bold text-white">Live Analysis Dashboard</h2>
+            <h2 className="text-3xl font-bold text-white">
+              Live Analysis · {current.name}
+            </h2>
             <p className="text-sm text-on-surface-variant mt-1">
               Real-time telemetry from active scanning session.
             </p>
@@ -200,7 +380,7 @@ function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {METRICS.map((m) => (
+          {current.metrics.map((m) => (
             <MetricCard key={m.label} m={m} />
           ))}
         </div>
@@ -218,13 +398,17 @@ function Dashboard() {
             </div>
           </div>
           <div className="h-64 flex items-end justify-between gap-3 px-4 border-b border-l border-white/10 relative">
-            {bars.map((b, i) => (
-              <div
-                key={i}
-                className={`flex-grow bg-${b.c}/20 hover:bg-${b.c}/40 transition-all rounded-t ${b.g}`}
-                style={{ height: `${b.h}%` }}
-              />
-            ))}
+            {current.spectrum.map((h, i) => {
+              const c = i % 2 === 0 ? "secondary" : "primary";
+              const g = c === "secondary" ? "glow-blue" : "glow-green";
+              return (
+                <div
+                  key={i}
+                  className={`flex-grow bg-${c}/20 hover:bg-${c}/40 transition-all duration-500 rounded-t ${g}`}
+                  style={{ height: `${h}%` }}
+                />
+              );
+            })}
           </div>
           <div className="mt-4 flex justify-between px-4 text-xs text-on-surface-variant/60">
             <span>400nm</span>
@@ -239,38 +423,266 @@ function Dashboard() {
   );
 }
 
+// ─────────── System Tools ───────────
+type ToolId = "diagnostics" | "sync" | "export" | "calibration" | "update";
+type Tool = {
+  id: ToolId;
+  icon: string;
+  label: string;
+  description: string;
+  steps: string[]; // log lines emitted while running
+  durationMs: number;
+};
+
+const TOOLS: Tool[] = [
+  {
+    id: "diagnostics",
+    icon: "monitor_heart",
+    label: "Diagnostics",
+    description: "Run a full hardware self-test on the FruitScan Elite probe.",
+    durationMs: 3200,
+    steps: [
+      "Probing optical bench…",
+      "Verifying CCD response (411nm – 980nm)…",
+      "Checking thermistor drift: ±0.12°C OK",
+      "Light source intensity nominal",
+      "Diagnostics PASSED — 0 faults",
+    ],
+  },
+  {
+    id: "sync",
+    icon: "cloud_sync",
+    label: "Database Sync",
+    description: "Sync latest produce reference profiles from the lab cloud.",
+    durationMs: 2600,
+    steps: [
+      "Authenticating with FruitScan Cloud…",
+      "Fetching reference deltas (v24.3.1 → v24.3.4)…",
+      "Merged 184 spectral signatures",
+      "Sync complete · last updated just now",
+    ],
+  },
+  {
+    id: "export",
+    icon: "table_chart",
+    label: "Data Export",
+    description: "Bundle the current session as a downloadable CSV report.",
+    durationMs: 1800,
+    steps: [
+      "Collating active session metrics…",
+      "Building CSV (4 metrics × 8 spectral bands)…",
+      "scan-report.csv ready for download",
+    ],
+  },
+  {
+    id: "calibration",
+    icon: "verified",
+    label: "Calibration",
+    description: "White-reference calibration against the supplied target.",
+    durationMs: 3600,
+    steps: [
+      "Insert white reference target…",
+      "Capturing baseline (12 frames)…",
+      "Computing correction matrix…",
+      "Drift compensation +0.7% applied",
+      "Calibration stored ✓",
+    ],
+  },
+  {
+    id: "update",
+    icon: "system_update_alt",
+    label: "Firmware Update",
+    description: "Apply the latest firmware to the connected device.",
+    durationMs: 4200,
+    steps: [
+      "Checking firmware channel (stable)…",
+      "Downloading FS-Elite-fw-v2.8.1 (2.4 MB)…",
+      "Verifying signature…",
+      "Flashing probe controller…",
+      "Reboot complete · running v2.8.1",
+    ],
+  },
+];
+
 function SystemTools() {
-  const tools = [
-    { icon: "history", label: "Scan History" },
-    { icon: "cloud_sync", label: "Database Sync" },
-    { icon: "table_chart", label: "Data Export" },
-    { icon: "verified", label: "Calibration" },
-  ];
+  const [active, setActive] = useState<ToolId | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [log, setLog] = useState<{ tool: ToolId; line: string; ts: string }[]>([]);
+  const [completed, setCompleted] = useState<Record<ToolId, string | null>>({
+    diagnostics: null,
+    sync: null,
+    export: null,
+    calibration: null,
+    update: null,
+  });
+  const timers = useRef<number[]>([]);
+  const logEnd = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    return () => timers.current.forEach((t) => window.clearTimeout(t));
+  }, []);
+
+  useEffect(() => {
+    logEnd.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [log]);
+
+  const run = (tool: Tool) => {
+    if (active) return;
+    setActive(tool.id);
+    setProgress(0);
+    setLog((l) => [
+      ...l,
+      {
+        tool: tool.id,
+        line: `▶ ${tool.label} started`,
+        ts: new Date().toLocaleTimeString(),
+      },
+    ]);
+    const stepInterval = tool.durationMs / tool.steps.length;
+    tool.steps.forEach((step, i) => {
+      const t = window.setTimeout(() => {
+        setLog((l) => [
+          ...l,
+          { tool: tool.id, line: step, ts: new Date().toLocaleTimeString() },
+        ]);
+      }, stepInterval * (i + 0.5));
+      timers.current.push(t);
+    });
+    const tickInterval = 60;
+    const ticks = Math.ceil(tool.durationMs / tickInterval);
+    for (let i = 1; i <= ticks; i++) {
+      const t = window.setTimeout(() => {
+        setProgress(Math.round((i / ticks) * 100));
+      }, i * tickInterval);
+      timers.current.push(t);
+    }
+    const done = window.setTimeout(() => {
+      setProgress(100);
+      setActive(null);
+      setCompleted((c) => ({ ...c, [tool.id]: new Date().toLocaleTimeString() }));
+      setLog((l) => [
+        ...l,
+        {
+          tool: tool.id,
+          line: `✓ ${tool.label} completed`,
+          ts: new Date().toLocaleTimeString(),
+        },
+      ]);
+    }, tool.durationMs + 50);
+    timers.current.push(done);
+  };
+
   return (
     <section className="bg-surface py-20 border-t border-white/5">
       <div className="max-w-7xl mx-auto px-6">
-        <h3 className="text-3xl font-bold text-white mb-12 text-center md:text-left">
-          System Tools
-        </h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {tools.map((t) => (
-            <a
-              key={t.label}
-              href="#"
-              className="btn-depth group flex flex-col items-center md:items-start gap-4 p-6 glass-card rounded-2xl transition-all border border-white/5 hover:border-primary/30"
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-10">
+          <div>
+            <h3 className="text-3xl font-bold text-white">System Tools</h3>
+            <p className="text-sm text-on-surface-variant mt-1">
+              Run device routines and watch live output below.
+            </p>
+          </div>
+          {active && (
+            <div className="flex items-center gap-3 text-sm text-primary">
+              <Icon name="progress_activity" className="animate-spin" />
+              Running {TOOLS.find((t) => t.id === active)?.label}… {progress}%
+            </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          {TOOLS.map((t) => {
+            const isActive = active === t.id;
+            const lastRun = completed[t.id];
+            return (
+              <button
+                key={t.id}
+                onClick={() => run(t)}
+                disabled={!!active}
+                className={`btn-depth group relative overflow-hidden flex flex-col items-start gap-3 p-5 glass-card rounded-2xl text-left transition-all border ${
+                  isActive
+                    ? "border-primary/50"
+                    : "border-white/5 hover:border-primary/30"
+                } disabled:opacity-60 disabled:cursor-not-allowed`}
+              >
+                <div className="flex items-center gap-3 w-full">
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                      isActive
+                        ? "bg-primary text-on-primary"
+                        : "bg-surface-container-high text-primary group-hover:bg-primary group-hover:text-on-primary"
+                    }`}
+                  >
+                    <Icon
+                      name={isActive ? "progress_activity" : t.icon}
+                      className={isActive ? "animate-spin" : ""}
+                    />
+                  </div>
+                  <span className="font-semibold text-white">{t.label}</span>
+                </div>
+                <p className="text-xs text-on-surface-variant leading-relaxed">
+                  {t.description}
+                </p>
+                <div className="w-full h-1 rounded-full bg-surface overflow-hidden sunk-in">
+                  <div
+                    className="h-full bg-primary glow-green transition-[width] duration-100"
+                    style={{ width: `${isActive ? progress : lastRun ? 100 : 0}%` }}
+                  />
+                </div>
+                <span className="text-[10px] uppercase tracking-wider text-on-surface-variant">
+                  {isActive
+                    ? `Running · ${progress}%`
+                    : lastRun
+                      ? `Last run ${lastRun}`
+                      : "Idle"}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Console output */}
+        <div className="mt-8 rounded-3xl glass-card overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-white/5 bg-surface-container/40">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-berry-red" />
+              <span className="w-2.5 h-2.5 rounded-full bg-citrus-orange" />
+              <span className="w-2.5 h-2.5 rounded-full bg-primary" />
+              <span className="ml-3 text-xs uppercase tracking-wider text-on-surface-variant font-semibold">
+                System Console
+              </span>
+            </div>
+            <button
+              onClick={() => setLog([])}
+              disabled={!!active || log.length === 0}
+              className="text-xs text-on-surface-variant hover:text-white transition disabled:opacity-30"
             >
-              <div className="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors">
-                <Icon name={t.icon} />
-              </div>
-              <span className="font-semibold text-white">{t.label}</span>
-            </a>
-          ))}
+              Clear
+            </button>
+          </div>
+          <div className="bg-surface-container-lowest/80 px-5 py-4 h-56 overflow-y-auto font-mono text-xs leading-relaxed">
+            {log.length === 0 ? (
+              <p className="text-on-surface-variant/60">
+                $ awaiting command — run any tool above to see live output.
+              </p>
+            ) : (
+              log.map((l, i) => (
+                <div key={i} className="flex gap-3">
+                  <span className="text-on-surface-variant/50">{l.ts}</span>
+                  <span className="text-primary/80">[{l.tool}]</span>
+                  <span className="text-white">{l.line}</span>
+                </div>
+              ))
+            )}
+            <div ref={logEnd} />
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
+// ─────────── Footer ───────────
 function Footer() {
   return (
     <footer className="border-t border-white/5 bg-background py-10">
@@ -285,13 +697,48 @@ function Footer() {
   );
 }
 
+// ─────────── Page ───────────
 function Index() {
+  const [current, setCurrent] = useState<Produce>(PRODUCE[1]);
+  const [scanning, setScanning] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const timers = useRef<number[]>([]);
+
+  useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), []);
+
+  const runScan = () => {
+    if (scanning) return;
+    setScanning(true);
+    setProgress(0);
+    const duration = 2200;
+    const tickInterval = 50;
+    const ticks = Math.ceil(duration / tickInterval);
+    for (let i = 1; i <= ticks; i++) {
+      const t = window.setTimeout(() => {
+        setProgress(Math.round((i / ticks) * 100));
+      }, i * tickInterval);
+      timers.current.push(t);
+    }
+    const done = window.setTimeout(() => {
+      setScanning(false);
+      setProgress(100);
+    }, duration + 50);
+    timers.current.push(done);
+  };
+
+  const pick = (p: Produce) => {
+    if (scanning) return;
+    setCurrent(p);
+    setProgress(0);
+  };
+
   return (
     <div className="bg-background text-on-surface min-h-screen">
       <TopNav />
       <main className="pt-14">
-        <Hero />
-        <Dashboard />
+        <Hero current={current} scanning={scanning} progress={progress} onScan={runScan} />
+        <PresetPicker current={current} onPick={pick} disabled={scanning} />
+        <Dashboard current={current} />
         <SystemTools />
       </main>
       <Footer />
