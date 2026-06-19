@@ -274,7 +274,6 @@ export function AnalysisReport({ current }: { current: Produce }) {
           <div className="glass-card rounded-3xl p-6">
             <h4 className="text-sm font-semibold text-berry-red mb-3 uppercase tracking-wider flex items-center gap-2">
               <Icon name="warning" /> Warnings
-            </ul-marker />
             </h4>
             <ul className="space-y-2 text-sm text-white">
               {a.wellness.warnings.map((b) => (
