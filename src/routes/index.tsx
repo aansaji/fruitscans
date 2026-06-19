@@ -661,7 +661,10 @@ function Index() {
         <Hero current={current} scanning={scanning} progress={progress} onScan={runScan} />
         <PresetPicker current={current} onPick={pick} disabled={scanning} />
         <Dashboard current={current} />
+        <AnalysisReport current={current} />
+        <CalibrationWizard />
         <SystemTools />
+
       </main>
       <Footer />
     </div>
