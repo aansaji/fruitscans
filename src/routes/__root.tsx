@@ -77,19 +77,25 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "FruitScan Elite — Lab-Grade Freshness Analysis" },
+      { title: "FruitScan — Lab-Grade Freshness Analysis" },
       {
         name: "description",
         content:
           "Lab-grade fruit freshness analysis. Upload captures or connect FruitScan Elite for real-time molecular quality inspection.",
       },
-      { property: "og:title", content: "FruitScan Elite — Lab-Grade Freshness Analysis" },
+      { property: "og:title", content: "FruitScan — Lab-Grade Freshness Analysis" },
       {
         property: "og:description",
         content: "Real-time molecular-level freshness, ripeness, and pesticide analysis.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "FruitScan — Lab-Grade Freshness Analysis" },
+      { name: "description", content: "Sweet UI Builder creates interactive user interfaces from HTML templates and hotlinked images." },
+      { property: "og:description", content: "Sweet UI Builder creates interactive user interfaces from HTML templates and hotlinked images." },
+      { name: "twitter:description", content: "Sweet UI Builder creates interactive user interfaces from HTML templates and hotlinked images." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/24ed622c-ef0e-4403-8bd4-b9745ce624ef/id-preview-cebdb600--2bd694fd-022a-4514-9092-347566b39314.lovable.app-1781851316963.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/24ed622c-ef0e-4403-8bd4-b9745ce624ef/id-preview-cebdb600--2bd694fd-022a-4514-9092-347566b39314.lovable.app-1781851316963.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
