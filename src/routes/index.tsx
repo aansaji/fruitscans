@@ -168,6 +168,20 @@ function PresetPicker({
   onPick: (p: Produce) => void;
   disabled: boolean;
 }) {
+  const [filter, setFilter] = useState<"All" | "Fresh" | "Decayed">("All");
+  const list = PRODUCE.filter((p) =>
+    filter === "All"
+      ? true
+      : filter === "Fresh"
+        ? p.condition === "Fresh"
+        : p.condition !== "Fresh",
+  );
+  const conditionColor: Record<Produce["condition"], string> = {
+    Fresh: "primary",
+    Stale: "citrus-orange",
+    Rotten: "berry-red",
+    Infected: "berry-red",
+  };
   return (
     <section id="presets" className="bg-surface-container-lowest py-16 border-t border-white/5">
       <div className="max-w-7xl mx-auto px-6">
@@ -175,16 +189,29 @@ function PresetPicker({
           <div>
             <h2 className="text-3xl font-bold text-white">Produce Library</h2>
             <p className="text-sm text-on-surface-variant mt-1">
-              Choose a preset sample to load its calibrated profile and run a scan.
+              Choose a preset sample — including stale, rotten and infected — to load its profile.
             </p>
           </div>
-          <span className="text-xs uppercase tracking-wider text-on-surface-variant">
-            {PRODUCE.length} presets available
-          </span>
+          <div className="flex items-center gap-2">
+            {(["All", "Fresh", "Decayed"] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                  filter === f
+                    ? "bg-primary text-on-primary border-primary"
+                    : "border-white/10 text-on-surface-variant hover:text-white"
+                }`}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          {PRODUCE.map((p) => {
+          {list.map((p) => {
             const active = p.id === current.id;
+            const cc = conditionColor[p.condition];
             return (
               <button
                 key={p.id}
@@ -201,6 +228,11 @@ function PresetPicker({
                 <span className="text-[10px] uppercase tracking-wider text-on-surface-variant">
                   {p.category}
                 </span>
+                <span
+                  className={`text-[9px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-${cc}/10 text-${cc} border border-${cc}/30`}
+                >
+                  {p.condition}
+                </span>
               </button>
             );
           })}
@@ -209,6 +241,7 @@ function PresetPicker({
     </section>
   );
 }
+
 
 // ─────────── Dashboard ───────────
 function MetricCard({ m }: { m: Metric }) {
