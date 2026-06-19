@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { PRODUCE, type Produce, type Metric } from "@/lib/produce";
+import { AnalysisReport } from "@/components/fruitscan/AnalysisReport";
+import { CalibrationWizard } from "@/components/fruitscan/CalibrationWizard";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -9,120 +12,6 @@ const Icon = ({ name, className = "" }: { name: string; className?: string }) =>
   <span className={`material-symbols-outlined ${className}`}>{name}</span>
 );
 
-// ─────────── Preset produce ───────────
-type ColorKey = "primary" | "secondary" | "citrus-orange" | "berry-red";
-type Metric = {
-  icon: string;
-  label: string;
-  value: string;
-  unit: string;
-  status: string;
-  color: ColorKey;
-  pct: number;
-  glow: string;
-};
-type Produce = {
-  id: string;
-  name: string;
-  emoji: string;
-  category: "Fruit" | "Vegetable";
-  image: string;
-  metrics: Metric[];
-  spectrum: number[]; // 8 bars 0–100
-};
-
-const PRODUCE: Produce[] = [
-  {
-    id: "strawberry",
-    name: "Strawberry",
-    emoji: "🍓",
-    category: "Fruit",
-    image:
-      "https://images.unsplash.com/photo-1518635017498-87f514b751ba?auto=format&fit=crop&w=1200&q=80",
-    metrics: [
-      { icon: "eco", label: "Ripeness Index", value: "92", unit: "/ 100", status: "Peak", color: "primary", pct: 92, glow: "glow-green" },
-      { icon: "opacity", label: "Moisture Level", value: "91.0", unit: "%", status: "High", color: "secondary", pct: 91, glow: "glow-blue" },
-      { icon: "bloodtype", label: "Sugar Content", value: "8.4", unit: "°Bx", status: "Sweet", color: "citrus-orange", pct: 70, glow: "glow-orange" },
-      { icon: "warning", label: "Pesticide Detection", value: "0.04", unit: "ppm", status: "Trace", color: "berry-red", pct: 22, glow: "glow-red" },
-    ],
-    spectrum: [30, 55, 70, 85, 60, 45, 75, 40],
-  },
-  {
-    id: "apple",
-    name: "Apple",
-    emoji: "🍎",
-    category: "Fruit",
-    image:
-      "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?auto=format&fit=crop&w=1200&q=80",
-    metrics: [
-      { icon: "eco", label: "Ripeness Index", value: "87", unit: "/ 100", status: "Optimal", color: "primary", pct: 87, glow: "glow-green" },
-      { icon: "opacity", label: "Moisture Level", value: "14.2", unit: "%", status: "Moderate", color: "citrus-orange", pct: 62, glow: "glow-orange" },
-      { icon: "bloodtype", label: "Sugar Content", value: "12.5", unit: "°Bx", status: "High Brix", color: "secondary", pct: 75, glow: "glow-blue" },
-      { icon: "warning", label: "Pesticide Detection", value: "0.02", unit: "ppm", status: "Trace", color: "berry-red", pct: 15, glow: "glow-red" },
-    ],
-    spectrum: [40, 60, 35, 80, 55, 45, 90, 30],
-  },
-  {
-    id: "banana",
-    name: "Banana",
-    emoji: "🍌",
-    category: "Fruit",
-    image:
-      "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=1200&q=80",
-    metrics: [
-      { icon: "eco", label: "Ripeness Index", value: "78", unit: "/ 100", status: "Ripe", color: "citrus-orange", pct: 78, glow: "glow-orange" },
-      { icon: "opacity", label: "Moisture Level", value: "74.9", unit: "%", status: "Balanced", color: "secondary", pct: 75, glow: "glow-blue" },
-      { icon: "bloodtype", label: "Sugar Content", value: "18.0", unit: "°Bx", status: "Very High", color: "primary", pct: 90, glow: "glow-green" },
-      { icon: "warning", label: "Pesticide Detection", value: "0.00", unit: "ppm", status: "Clean", color: "berry-red", pct: 4, glow: "glow-red" },
-    ],
-    spectrum: [25, 45, 60, 70, 80, 55, 65, 50],
-  },
-  {
-    id: "tomato",
-    name: "Tomato",
-    emoji: "🍅",
-    category: "Vegetable",
-    image:
-      "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=1200&q=80",
-    metrics: [
-      { icon: "eco", label: "Ripeness Index", value: "81", unit: "/ 100", status: "Optimal", color: "primary", pct: 81, glow: "glow-green" },
-      { icon: "opacity", label: "Moisture Level", value: "94.5", unit: "%", status: "High", color: "secondary", pct: 94, glow: "glow-blue" },
-      { icon: "bloodtype", label: "Sugar Content", value: "4.2", unit: "°Bx", status: "Low", color: "citrus-orange", pct: 35, glow: "glow-orange" },
-      { icon: "warning", label: "Pesticide Detection", value: "0.06", unit: "ppm", status: "Trace", color: "berry-red", pct: 28, glow: "glow-red" },
-    ],
-    spectrum: [50, 75, 45, 85, 40, 65, 55, 35],
-  },
-  {
-    id: "carrot",
-    name: "Carrot",
-    emoji: "🥕",
-    category: "Vegetable",
-    image:
-      "https://images.unsplash.com/photo-1582515073490-39981397c445?auto=format&fit=crop&w=1200&q=80",
-    metrics: [
-      { icon: "eco", label: "Ripeness Index", value: "85", unit: "/ 100", status: "Optimal", color: "primary", pct: 85, glow: "glow-green" },
-      { icon: "opacity", label: "Moisture Level", value: "88.3", unit: "%", status: "High", color: "secondary", pct: 88, glow: "glow-blue" },
-      { icon: "bloodtype", label: "Sugar Content", value: "6.1", unit: "°Bx", status: "Moderate", color: "citrus-orange", pct: 50, glow: "glow-orange" },
-      { icon: "warning", label: "Pesticide Detection", value: "0.01", unit: "ppm", status: "Clean", color: "berry-red", pct: 8, glow: "glow-red" },
-    ],
-    spectrum: [35, 50, 80, 55, 70, 90, 45, 60],
-  },
-  {
-    id: "avocado",
-    name: "Avocado",
-    emoji: "🥑",
-    category: "Fruit",
-    image:
-      "https://images.unsplash.com/photo-1601039641847-7857b994d704?auto=format&fit=crop&w=1200&q=80",
-    metrics: [
-      { icon: "eco", label: "Ripeness Index", value: "69", unit: "/ 100", status: "Near Ripe", color: "citrus-orange", pct: 69, glow: "glow-orange" },
-      { icon: "opacity", label: "Moisture Level", value: "73.2", unit: "%", status: "Balanced", color: "secondary", pct: 73, glow: "glow-blue" },
-      { icon: "bloodtype", label: "Sugar Content", value: "0.7", unit: "°Bx", status: "Low", color: "primary", pct: 10, glow: "glow-green" },
-      { icon: "warning", label: "Pesticide Detection", value: "0.00", unit: "ppm", status: "Clean", color: "berry-red", pct: 3, glow: "glow-red" },
-    ],
-    spectrum: [60, 40, 55, 70, 50, 80, 35, 65],
-  },
-];
 
 // ─────────── Top Nav ───────────
 function TopNav() {
@@ -279,6 +168,20 @@ function PresetPicker({
   onPick: (p: Produce) => void;
   disabled: boolean;
 }) {
+  const [filter, setFilter] = useState<"All" | "Fresh" | "Decayed">("All");
+  const list = PRODUCE.filter((p) =>
+    filter === "All"
+      ? true
+      : filter === "Fresh"
+        ? p.condition === "Fresh"
+        : p.condition !== "Fresh",
+  );
+  const conditionColor: Record<Produce["condition"], string> = {
+    Fresh: "primary",
+    Stale: "citrus-orange",
+    Rotten: "berry-red",
+    Infected: "berry-red",
+  };
   return (
     <section id="presets" className="bg-surface-container-lowest py-16 border-t border-white/5">
       <div className="max-w-7xl mx-auto px-6">
@@ -286,16 +189,29 @@ function PresetPicker({
           <div>
             <h2 className="text-3xl font-bold text-white">Produce Library</h2>
             <p className="text-sm text-on-surface-variant mt-1">
-              Choose a preset sample to load its calibrated profile and run a scan.
+              Choose a preset sample — including stale, rotten and infected — to load its profile.
             </p>
           </div>
-          <span className="text-xs uppercase tracking-wider text-on-surface-variant">
-            {PRODUCE.length} presets available
-          </span>
+          <div className="flex items-center gap-2">
+            {(["All", "Fresh", "Decayed"] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                  filter === f
+                    ? "bg-primary text-on-primary border-primary"
+                    : "border-white/10 text-on-surface-variant hover:text-white"
+                }`}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          {PRODUCE.map((p) => {
+          {list.map((p) => {
             const active = p.id === current.id;
+            const cc = conditionColor[p.condition];
             return (
               <button
                 key={p.id}
@@ -312,6 +228,11 @@ function PresetPicker({
                 <span className="text-[10px] uppercase tracking-wider text-on-surface-variant">
                   {p.category}
                 </span>
+                <span
+                  className={`text-[9px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-${cc}/10 text-${cc} border border-${cc}/30`}
+                >
+                  {p.condition}
+                </span>
               </button>
             );
           })}
@@ -320,6 +241,7 @@ function PresetPicker({
     </section>
   );
 }
+
 
 // ─────────── Dashboard ───────────
 function MetricCard({ m }: { m: Metric }) {
@@ -739,7 +661,10 @@ function Index() {
         <Hero current={current} scanning={scanning} progress={progress} onScan={runScan} />
         <PresetPicker current={current} onPick={pick} disabled={scanning} />
         <Dashboard current={current} />
+        <AnalysisReport current={current} />
+        <CalibrationWizard />
         <SystemTools />
+
       </main>
       <Footer />
     </div>
