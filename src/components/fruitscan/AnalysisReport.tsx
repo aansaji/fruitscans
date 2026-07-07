@@ -215,6 +215,20 @@ export function AnalysisReport({ current }: { current: Produce }) {
   const a = current.analysis;
   return (
     <>
+      <div className="max-w-7xl mx-auto px-6 pt-10 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-xs uppercase tracking-wider text-on-surface-variant font-semibold">
+            Full Analytical Report
+          </p>
+          <p className="text-lg text-white font-semibold">{current.name}</p>
+        </div>
+        <button
+          onClick={() => downloadReportPdf(current)}
+          className="btn-depth inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-on-primary text-sm font-semibold"
+        >
+          <Icon name="picture_as_pdf" /> Download PDF
+        </button>
+      </div>
       {/* Lab Assessment */}
       <Section
         id="lab"
