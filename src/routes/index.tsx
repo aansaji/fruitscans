@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { PRODUCE, type Produce, type Metric } from "@/lib/produce";
 import { AnalysisReport } from "@/components/fruitscan/AnalysisReport";
-import { CalibrationWizard } from "@/components/fruitscan/CalibrationWizard";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -604,6 +603,105 @@ function SystemTools() {
   );
 }
 
+// ─────────── Scan History ───────────
+type ScanEntry = {
+  id: string;
+  produceId: string;
+  name: string;
+  category: string;
+  condition: string;
+  grade: string;
+  ts: number;
+};
+
+const HISTORY_KEY = "fruitscan.history.v1";
+
+function loadHistory(): ScanEntry[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(HISTORY_KEY);
+    return raw ? (JSON.parse(raw) as ScanEntry[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveHistory(entries: ScanEntry[]) {
+  try {
+    window.localStorage.setItem(HISTORY_KEY, JSON.stringify(entries));
+  } catch {
+    /* ignore quota */
+  }
+}
+
+function ScanHistory({
+  entries,
+  onPick,
+  onClear,
+}: {
+  entries: ScanEntry[];
+  onPick: (produceId: string) => void;
+  onClear: () => void;
+}) {
+  return (
+    <section id="history" className="bg-surface py-16 border-t border-white/5">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex flex-wrap items-end justify-between gap-3 mb-8">
+          <div>
+            <h3 className="text-2xl md:text-3xl font-bold text-white">Scan History</h3>
+            <p className="text-sm text-on-surface-variant mt-1">
+              Every completed scan is stored locally and survives refreshes.
+            </p>
+          </div>
+          <div className="flex items-center gap-3 text-sm text-on-surface-variant">
+            <span className="font-mono text-primary">{entries.length}</span> stored
+            <button
+              onClick={onClear}
+              disabled={entries.length === 0}
+              className="text-xs uppercase tracking-wider text-on-surface-variant hover:text-berry-red disabled:opacity-30"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+
+        {entries.length === 0 ? (
+          <div className="glass-card rounded-3xl p-8 text-center text-on-surface-variant">
+            No scans yet — pick a sample and hit <span className="text-primary">Scan</span>.
+          </div>
+        ) : (
+          <div className="glass-card rounded-3xl overflow-hidden">
+            <div className="grid grid-cols-12 px-5 py-3 text-[10px] uppercase tracking-wider text-on-surface-variant border-b border-white/5 bg-surface-container/40">
+              <span className="col-span-4">Sample</span>
+              <span className="col-span-2">Category</span>
+              <span className="col-span-2">Condition</span>
+              <span className="col-span-1">Grade</span>
+              <span className="col-span-3 text-right">Time</span>
+            </div>
+            <ul className="max-h-96 overflow-y-auto divide-y divide-white/5">
+              {entries.map((e) => (
+                <li
+                  key={e.id}
+                  className="grid grid-cols-12 px-5 py-3 items-center text-sm hover:bg-primary/5 cursor-pointer transition"
+                  onClick={() => onPick(e.produceId)}
+                >
+                  <span className="col-span-4 text-white font-medium truncate">{e.name}</span>
+                  <span className="col-span-2 text-on-surface-variant">{e.category}</span>
+                  <span className="col-span-2 text-on-surface-variant">{e.condition}</span>
+                  <span className="col-span-1 font-mono text-primary">{e.grade}</span>
+                  <span className="col-span-3 text-right font-mono text-xs text-on-surface-variant">
+                    {new Date(e.ts).toLocaleString()}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 // ─────────── Footer ───────────
 function Footer() {
   return (
@@ -624,9 +722,30 @@ function Index() {
   const [current, setCurrent] = useState<Produce>(PRODUCE[1]);
   const [scanning, setScanning] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [history, setHistory] = useState<ScanEntry[]>([]);
   const timers = useRef<number[]>([]);
 
-  useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), []);
+  useEffect(() => {
+    setHistory(loadHistory());
+    return () => timers.current.forEach((t) => window.clearTimeout(t));
+  }, []);
+
+  const recordScan = (p: Produce) => {
+    const entry: ScanEntry = {
+      id: `scan_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      produceId: p.id,
+      name: p.name,
+      category: p.category,
+      condition: p.condition,
+      grade: p.analysis.lab.grade,
+      ts: Date.now(),
+    };
+    setHistory((prev) => {
+      const next = [entry, ...prev].slice(0, 200);
+      saveHistory(next);
+      return next;
+    });
+  };
 
   const runScan = () => {
     if (scanning) return;
@@ -644,6 +763,7 @@ function Index() {
     const done = window.setTimeout(() => {
       setScanning(false);
       setProgress(100);
+      recordScan(current);
     }, duration + 50);
     timers.current.push(done);
   };
@@ -654,6 +774,16 @@ function Index() {
     setProgress(0);
   };
 
+  const pickFromHistory = (produceId: string) => {
+    const p = PRODUCE.find((x) => x.id === produceId);
+    if (p) pick(p);
+  };
+
+  const clearHistory = () => {
+    setHistory([]);
+    saveHistory([]);
+  };
+
   return (
     <div className="bg-background text-on-surface min-h-screen">
       <TopNav />
@@ -662,9 +792,8 @@ function Index() {
         <PresetPicker current={current} onPick={pick} disabled={scanning} />
         <Dashboard current={current} />
         <AnalysisReport current={current} />
-        <CalibrationWizard />
+        <ScanHistory entries={history} onPick={pickFromHistory} onClear={clearHistory} />
         <SystemTools />
-
       </main>
       <Footer />
     </div>
