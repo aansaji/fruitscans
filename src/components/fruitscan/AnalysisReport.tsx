@@ -151,6 +151,91 @@ function downloadReportPdf(current: Produce) {
   doc.save(`fruitscan-${slug}-report.pdf`);
 }
 
+function triggerDownload(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 100);
+}
+
+function downloadReportJson(current: Produce) {
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    produce: {
+      id: current.id,
+      name: current.name,
+      category: current.category,
+      condition: current.condition,
+    },
+    metrics: current.metrics,
+    analysis: current.analysis,
+  };
+  const slug = current.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  triggerDownload(
+    new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }),
+    `fruitscan-${slug}-report.json`,
+  );
+}
+
+function csvEscape(v: unknown) {
+  const s = v === null || v === undefined ? "" : String(v);
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function downloadReportCsv(current: Produce) {
+  const a = current.analysis;
+  const rows: string[][] = [["section", "key", "value", "detail"]];
+  const push = (section: string, key: string, value: unknown, detail = "") =>
+    rows.push([section, key, String(value ?? ""), detail]);
+
+  push("Sample", "Name", current.name);
+  push("Sample", "Category", current.category);
+  push("Sample", "Condition", current.condition);
+  push("Sample", "ExportedAt", new Date().toISOString());
+
+  current.metrics.forEach((m) =>
+    push("Metrics", m.label, `${m.value}${m.unit ?? ""}`, m.status ?? ""),
+  );
+
+  push("Lab", "Grade", a.lab.grade, a.lab.summary);
+  push("Lab", "pH", a.lab.pH);
+  push("Lab", "Brix", a.lab.brix);
+  push("Lab", "Firmness", a.lab.firmness);
+  push("Lab", "Acidity", a.lab.acidity);
+
+  push("Microbial", "Status", a.microbial.status, a.microbial.note);
+  a.microbial.pathogens.forEach((pg) => push("Microbial.Pathogen", pg.name, pg.cfu, pg.risk));
+
+  a.fingerprint.forEach((b) =>
+    push("Fingerprint", b.range, b.compound, `intensity=${b.intensity}%`),
+  );
+  a.molecules.forEach((m) => push("Molecules", m.name, `${m.value} ${m.unit}`, `pct=${m.pct}`));
+  a.electrolytes.forEach((e) => push("Electrolytes", e.name, `${e.value} ${e.unit}`));
+
+  push("Wellness", "Score", a.wellness.score);
+  push("Wellness", "Biocompatibility", a.wellness.biocompatibility);
+  push("Wellness", "MetabolicLimit", a.wellness.metabolicLimit);
+  push("Wellness", "Therapeutic", a.wellness.therapeutic);
+  a.wellness.benefits.forEach((b, i) => push("Wellness.Benefit", `#${i + 1}`, b));
+  a.wellness.warnings.forEach((b, i) => push("Wellness.Warning", `#${i + 1}`, b));
+
+  push("Circular", "RecoverableValue%", a.circular.wasteScore);
+  a.circular.zeroWaste.forEach((z, i) => push("Circular.ZeroWaste", `#${i + 1}`, z));
+  a.circular.upcycle.forEach((u) =>
+    u.steps.forEach((s, i) => push("Circular.Upcycle", u.title, s, `step=${i + 1}`)),
+  );
+
+  const csv = rows.map((r) => r.map(csvEscape).join(",")).join("\n");
+  const slug = current.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  triggerDownload(new Blob([csv], { type: "text/csv" }), `fruitscan-${slug}-report.csv`);
+}
+
+
+
 
 const Icon = ({ name, className = "" }: { name: string; className?: string }) => (
   <span className={`material-symbols-outlined ${className}`}>{name}</span>
