@@ -307,12 +307,26 @@ export function AnalysisReport({ current }: { current: Produce }) {
           </p>
           <p className="text-lg text-white font-semibold">{current.name}</p>
         </div>
-        <button
-          onClick={() => downloadReportPdf(current)}
-          className="btn-depth inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-on-primary text-sm font-semibold"
-        >
-          <Icon name="picture_as_pdf" /> Download PDF
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => downloadReportPdf(current)}
+            className="btn-depth inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-on-primary text-sm font-semibold"
+          >
+            <Icon name="picture_as_pdf" /> PDF
+          </button>
+          <button
+            onClick={() => downloadReportJson(current)}
+            className="btn-depth inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/15 border border-secondary/30 text-secondary text-sm font-semibold hover:bg-secondary/25 transition"
+          >
+            <Icon name="data_object" /> JSON
+          </button>
+          <button
+            onClick={() => downloadReportCsv(current)}
+            className="btn-depth inline-flex items-center gap-2 px-4 py-2 rounded-full bg-citrus-orange/15 border border-citrus-orange/30 text-citrus-orange text-sm font-semibold hover:bg-citrus-orange/25 transition"
+          >
+            <Icon name="table_view" /> CSV
+          </button>
+        </div>
       </div>
       {/* Lab Assessment */}
       <Section
