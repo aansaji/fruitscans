@@ -14,46 +14,12 @@ export type CalibrationStep = {
 
 export const CALIBRATION_STEPS: CalibrationStep[] = [
   {
-    id: "warmup",
-    title: "Warm up source",
-    instruction: "Power the halogen + LED source. Allow 30 s thermal stabilisation.",
-    icon: "lightbulb",
-    durationMs: 1800,
-  },
-  {
-    id: "dark",
-    title: "Capture dark frame",
-    instruction: "Cap the probe with the black shutter to record the dark baseline.",
-    icon: "dark_mode",
-    durationMs: 1500,
-  },
-  {
-    id: "white",
-    title: "White reference",
-    instruction: "Place the supplied PTFE white target flush to the optical window.",
-    icon: "contrast",
-    durationMs: 1800,
-  },
-  {
-    id: "sample",
-    title: "Sample acquisition",
-    instruction: "Hold the produce sample firmly against the probe head.",
-    icon: "scanner",
-    durationMs: 2000,
-  },
-  {
-    id: "fit",
-    title: "Fit correction matrix",
-    instruction: "Solve the spectral correction matrix across the active range.",
-    icon: "tune",
-    durationMs: 1600,
-  },
-  {
-    id: "verify",
-    title: "Verify drift",
-    instruction: "Re-measure white target and confirm Δ < 1.0%.",
-    icon: "verified",
-    durationMs: 1400,
+    id: "auto",
+    title: "Full auto-calibration",
+    instruction:
+      "One-shot routine: warms the source, captures dark & white references, fits the correction matrix and verifies drift < 1.0%.",
+    icon: "auto_fix_high",
+    durationMs: 2600,
   },
 ];
 
