@@ -1,4 +1,156 @@
+import { jsPDF } from "jspdf";
 import type { Produce } from "@/lib/produce";
+
+function downloadReportPdf(current: Produce) {
+  const a = current.analysis;
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 48;
+  let y = margin;
+
+  const ensure = (needed = 20) => {
+    if (y + needed > pageH - margin) {
+      doc.addPage();
+      y = margin;
+    }
+  };
+  const h1 = (t: string) => {
+    ensure(28);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.setTextColor(20, 90, 40);
+    doc.text(t, margin, y);
+    y += 20;
+    doc.setDrawColor(200);
+    doc.line(margin, y, pageW - margin, y);
+    y += 12;
+    doc.setTextColor(30);
+  };
+  const h2 = (t: string) => {
+    ensure(22);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(40);
+    doc.text(t, margin, y);
+    y += 16;
+  };
+  const p = (t: string) => {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(55);
+    const lines = doc.splitTextToSize(t, pageW - margin * 2);
+    lines.forEach((ln: string) => {
+      ensure(14);
+      doc.text(ln, margin, y);
+      y += 13;
+    });
+  };
+  const kv = (k: string, v: string) => {
+    ensure(14);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(40);
+    doc.text(`${k}:`, margin, y);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(60);
+    doc.text(v, margin + 110, y);
+    y += 14;
+  };
+  const bullet = (t: string) => {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(55);
+    const lines = doc.splitTextToSize(`• ${t}`, pageW - margin * 2 - 8);
+    lines.forEach((ln: string, i: number) => {
+      ensure(13);
+      doc.text(ln, margin + (i === 0 ? 0 : 10), y);
+      y += 13;
+    });
+  };
+
+  // Header
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(22);
+  doc.setTextColor(20, 90, 40);
+  doc.text("FruitScan Elite — Analysis Report", margin, y);
+  y += 26;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(11);
+  doc.setTextColor(90);
+  doc.text(
+    `${current.name} · ${current.category} · ${current.condition} · ${new Date().toLocaleString()}`,
+    margin,
+    y,
+  );
+  y += 20;
+
+  h1("Lab Assessment");
+  kv("Overall Grade", a.lab.grade);
+  kv("pH", a.lab.pH);
+  kv("Brix", a.lab.brix);
+  kv("Firmness", a.lab.firmness);
+  kv("Titratable Acidity", a.lab.acidity);
+  p(a.lab.summary);
+  y += 6;
+
+  h1("Microbial & Pathological Tissue Status");
+  kv("Status", a.microbial.status);
+  p(a.microbial.note);
+  y += 4;
+  h2("Pathogen Load");
+  a.microbial.pathogens.forEach((pg) => bullet(`${pg.name} — ${pg.risk} — ${pg.cfu}`));
+  y += 6;
+
+  h1("Spectrometer Chemical Fingerprint");
+  a.fingerprint.forEach((b) => bullet(`${b.range} — ${b.compound} (intensity ${b.intensity}%)`));
+  y += 6;
+
+  h1("Identified Molecules & Electrolytes");
+  h2("Molecules");
+  a.molecules.forEach((m) => bullet(`${m.name}: ${m.value} ${m.unit}`));
+  h2("Electrolytes");
+  a.electrolytes.forEach((e) => bullet(`${e.name}: ${e.value} ${e.unit}`));
+  y += 6;
+
+  h1("Wellness Impact Assessment");
+  kv("Wellness Score", `${a.wellness.score} / 100`);
+  kv("Biocompatibility", a.wellness.biocompatibility);
+  kv("Metabolic Limit", a.wellness.metabolicLimit);
+  kv("Therapeutic", a.wellness.therapeutic);
+  h2("Benefits");
+  a.wellness.benefits.forEach(bullet);
+  h2("Warnings");
+  a.wellness.warnings.forEach(bullet);
+  y += 6;
+
+  h1("Organic Circular Economy Guide");
+  kv("Recoverable Value", `${a.circular.wasteScore}%`);
+  h2("Zero-Waste Strategy");
+  a.circular.zeroWaste.forEach(bullet);
+  a.circular.upcycle.forEach((u) => {
+    h2(u.title);
+    u.steps.forEach((s, i) => bullet(`${i + 1}. ${s}`));
+  });
+
+  // Footer page numbers
+  const pageCount = doc.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(9);
+    doc.setTextColor(140);
+    doc.text(
+      `FruitScan Elite · ${current.name} · page ${i} / ${pageCount}`,
+      pageW / 2,
+      pageH - 20,
+      { align: "center" },
+    );
+  }
+
+  const slug = current.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  doc.save(`fruitscan-${slug}-report.pdf`);
+}
+
 
 const Icon = ({ name, className = "" }: { name: string; className?: string }) => (
   <span className={`material-symbols-outlined ${className}`}>{name}</span>
@@ -63,6 +215,20 @@ export function AnalysisReport({ current }: { current: Produce }) {
   const a = current.analysis;
   return (
     <>
+      <div className="max-w-7xl mx-auto px-6 pt-10 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-xs uppercase tracking-wider text-on-surface-variant font-semibold">
+            Full Analytical Report
+          </p>
+          <p className="text-lg text-white font-semibold">{current.name}</p>
+        </div>
+        <button
+          onClick={() => downloadReportPdf(current)}
+          className="btn-depth inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-on-primary text-sm font-semibold"
+        >
+          <Icon name="picture_as_pdf" /> Download PDF
+        </button>
+      </div>
       {/* Lab Assessment */}
       <Section
         id="lab"
