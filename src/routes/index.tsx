@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { PRODUCE, type Produce, type Metric } from "@/lib/produce";
 import { AnalysisReport } from "@/components/fruitscan/AnalysisReport";
-import { CalibrationWizard } from "@/components/fruitscan/CalibrationWizard";
 
 export const Route = createFileRoute("/")({
   component: Index,
