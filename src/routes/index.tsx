@@ -14,7 +14,20 @@ const Icon = ({ name, className = "" }: { name: string; className?: string }) =>
 
 // ─────────── Top Nav ───────────
 function TopNav() {
-  const links = ["Scan", "Library", "Devices", "Insights"];
+  const links: { label: string; href: string }[] = [
+    { label: "Scan", href: "#scan" },
+    { label: "Library", href: "#presets" },
+    { label: "Devices", href: "#devices" },
+    { label: "Insights", href: "#insights" },
+  ];
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    const el = document.querySelector(href);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      history.replaceState(null, "", href);
+    }
+  };
   return (
     <header className="fixed top-0 inset-x-0 z-50 h-14 backdrop-blur-xl bg-background/70 border-b border-white/5">
       <div className="max-w-7xl mx-auto h-full px-6 flex items-center justify-between">
@@ -28,11 +41,17 @@ function TopNav() {
         </div>
         <nav className="hidden md:flex items-center gap-8 text-sm text-on-surface-variant">
           {links.map((l) => (
-            <a key={l} href="#" className="hover:text-white transition-colors">
-              {l}
+            <a
+              key={l.label}
+              href={l.href}
+              onClick={(e) => handleClick(e, l.href)}
+              className="hover:text-white transition-colors"
+            >
+              {l.label}
             </a>
           ))}
         </nav>
+
         <a
           href="#presets"
           className="btn-depth px-4 py-2 rounded-full bg-primary text-on-primary text-sm font-semibold"
@@ -57,7 +76,7 @@ function Hero({
   onScan: () => void;
 }) {
   return (
-    <section className="relative bg-surface px-6 py-12 md:py-20 overflow-hidden">
+    <section id="scan" className="relative bg-surface px-6 py-12 md:py-20 overflow-hidden scroll-mt-20">
       <div className="absolute top-0 right-0 w-1/3 h-1/2 bg-primary/5 blur-[120px] -z-10" />
       <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
         <div className="space-y-6">
@@ -182,7 +201,7 @@ function PresetPicker({
     Infected: "berry-red",
   };
   return (
-    <section id="presets" className="bg-surface-container-lowest py-16 border-t border-white/5">
+    <section id="presets" className="bg-surface-container-lowest py-16 border-t border-white/5 scroll-mt-20">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-8">
           <div>
@@ -277,7 +296,7 @@ function MetricCard({ m }: { m: Metric }) {
 
 function Dashboard({ current }: { current: Produce }) {
   return (
-    <section className="py-20 bg-surface-container-lowest border-t border-white/5">
+    <section id="insights" className="py-20 bg-surface-container-lowest border-t border-white/5 scroll-mt-20">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
           <div>
@@ -494,7 +513,7 @@ function SystemTools() {
   };
 
   return (
-    <section className="bg-surface py-20 border-t border-white/5">
+    <section id="devices" className="bg-surface py-20 border-t border-white/5 scroll-mt-20">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-10">
           <div>
