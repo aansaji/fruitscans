@@ -14,7 +14,20 @@ const Icon = ({ name, className = "" }: { name: string; className?: string }) =>
 
 // ─────────── Top Nav ───────────
 function TopNav() {
-  const links = ["Scan", "Library", "Devices", "Insights"];
+  const links: { label: string; href: string }[] = [
+    { label: "Scan", href: "#scan" },
+    { label: "Library", href: "#presets" },
+    { label: "Devices", href: "#devices" },
+    { label: "Insights", href: "#insights" },
+  ];
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    const el = document.querySelector(href);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      history.replaceState(null, "", href);
+    }
+  };
   return (
     <header className="fixed top-0 inset-x-0 z-50 h-14 backdrop-blur-xl bg-background/70 border-b border-white/5">
       <div className="max-w-7xl mx-auto h-full px-6 flex items-center justify-between">
@@ -28,11 +41,17 @@ function TopNav() {
         </div>
         <nav className="hidden md:flex items-center gap-8 text-sm text-on-surface-variant">
           {links.map((l) => (
-            <a key={l} href="#" className="hover:text-white transition-colors">
-              {l}
+            <a
+              key={l.label}
+              href={l.href}
+              onClick={(e) => handleClick(e, l.href)}
+              className="hover:text-white transition-colors"
+            >
+              {l.label}
             </a>
           ))}
         </nav>
+
         <a
           href="#presets"
           className="btn-depth px-4 py-2 rounded-full bg-primary text-on-primary text-sm font-semibold"
