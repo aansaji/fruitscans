@@ -201,7 +201,7 @@ function PresetPicker({
     Infected: "berry-red",
   };
   return (
-    <section id="presets" className="bg-surface-container-lowest py-16 border-t border-white/5">
+    <section id="presets" className="bg-surface-container-lowest py-16 border-t border-white/5 scroll-mt-20">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-8">
           <div>
