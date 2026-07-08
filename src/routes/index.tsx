@@ -296,7 +296,7 @@ function MetricCard({ m }: { m: Metric }) {
 
 function Dashboard({ current }: { current: Produce }) {
   return (
-    <section className="py-20 bg-surface-container-lowest border-t border-white/5">
+    <section id="insights" className="py-20 bg-surface-container-lowest border-t border-white/5 scroll-mt-20">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
           <div>
