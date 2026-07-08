@@ -76,7 +76,7 @@ function Hero({
   onScan: () => void;
 }) {
   return (
-    <section className="relative bg-surface px-6 py-12 md:py-20 overflow-hidden">
+    <section id="scan" className="relative bg-surface px-6 py-12 md:py-20 overflow-hidden scroll-mt-20">
       <div className="absolute top-0 right-0 w-1/3 h-1/2 bg-primary/5 blur-[120px] -z-10" />
       <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
         <div className="space-y-6">
